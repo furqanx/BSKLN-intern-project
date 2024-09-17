@@ -1,0 +1,43 @@
+services:
+  airflow-webserver:
+    image: apache/airflow:latest
+    container_name: airflow-webserver
+    restart: always
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:root@postgres/practicedb
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+    volumes:
+      - ../../dags:/opt/airflow/dags
+      - ../../logs/airflow:/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    networks:
+      - internal_network
+
+  airflow-scheduler:
+    image: apache/airflow:latest
+    container_name: airflow-scheduler
+    restart: always
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:root@postgres/practicedb
+    volumes:
+      - ../../dags:/opt/airflow/dags
+      - ../../logs/airflow:/opt/airflow/logs
+    networks:
+      - internal_network
+
+  airflow-init:
+    image: apache/airflow:latest
+    container_name: airflow-init
+    command: ["airflow", "db", "init"]
+    volumes:
+      - ../../dags:/opt/airflow/dags
+      - ../../logs/airflow:/opt/airflow/logs
+    networks:
+      - internal_network
+
+networks:
+  internal_network:
+    external: true

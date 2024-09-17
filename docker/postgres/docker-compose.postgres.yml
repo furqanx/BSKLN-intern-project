@@ -1,0 +1,46 @@
+services:
+  # PostgreSQL untuk database
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    hostname: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: practicedb
+      POSTGRES_LOG_STATEMENT: all                # Log semua query yang dijalankan
+      POSTGRES_LOG_DESTINATION: stderr           # Log ke output standar (stdout/stderr)
+      POSTGRES_LOG_MIN_DURATION_STATEMENT: 500   # Log query yang berjalan lebih dari 500 ms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - internal_network
+    command: ["postgres", "-c", "wal_level=logical"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # pgAdmin untuk monitoring PostgreSQL
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin-web
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "5050:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: root
+  #   restart: unless-stopped
+
+volumes:
+  postgres-data:
+
+networks:
+  internal_network:
+    external: true
